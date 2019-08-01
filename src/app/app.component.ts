@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
-import $ from 'jquery';
+import * as Stomp from 'stompjs';
 
 @Component({
   selector: 'app-root',
@@ -9,31 +8,54 @@ import $ from 'jquery';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  private serverUrl = 'http://localhost:8080/socket'
   private title = 'WebSockets chat';
-  private stompClient;
+  private stompClient = null;
 
-  constructor(){
-    this.initializeWebSocketConnection();
+
+  constructor() {
   }
 
-  initializeWebSocketConnection(){
-    let ws = new SockJS(this.serverUrl);
-    this.stompClient = Stomp.over(ws);
-    let that = this;
-    this.stompClient.connect({}, function(frame) {
-      that.stompClient.subscribe("/chat", (message) => {
-        if(message.body) {
-          $(".chat").append("<div class='message'>"+message.body+"</div>")
-          console.log(message.body);
-        }
+setConnected(connected) {
+      (document.getElementById('disconnect') as HTMLInputElement).disabled = !connected;
+      document.getElementById('conversationDiv').style.visibility
+        = connected ? 'visible' : 'hidden';
+      document.getElementById('response').innerHTML = '';
+  }
+
+connect() {
+      let socket = new SockJS('http://localhost:8080/spring-mvc-java/chat');
+      this.stompClient = Stomp.over(socket);
+      this.stompClient.connect({}, function(frame) {
+          this.setConnected(true);
+          console.log('Connected: ' + frame);
+          this.stompClient.subscribe('/topic/messages', function(messageOutput) {
+              this.showMessageOutput(JSON.parse(messageOutput.body));
+          });
       });
-    });
   }
 
-  sendMessage(message){
-    this.stompClient.send("/app/send/message" , {}, message);
-    $('#input').val('');
+disconnect() {
+      if (this.stompClient != null) {
+          this.stompClient.disconnect();
+      }
+      this.setConnected(false);
+      console.log('Disconnected');
+  }
+
+sendMessage() {
+      let from = (document.getElementById('from') as HTMLInputElement).value;
+      let text = (document.getElementById('text')as HTMLInputElement).value;
+      this.stompClient.send('/app/chat', {},
+        JSON.stringify({from: from, text: text}));
+  }
+
+showMessageOutput(messageOutput) {
+      let response = document.getElementById('response');
+      let p = document.createElement('p');
+      p.style.wordWrap = 'break-word';
+      p.appendChild(document.createTextNode(messageOutput.from + ': '
+        + messageOutput.text + ' (' + messageOutput.time + ')'));
+      response.appendChild(p);
   }
 
 }

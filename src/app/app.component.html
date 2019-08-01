@@ -1,22 +1,19 @@
-<div class="container">
-  <!-- <div class="jumbotron">
-    <h1>Welcome</h1>
-    <h2>Angular ajsnd</h2>
-  </div>
-
-  <div class="panel panel-primary">
-    <div class="panel-heading">
-      Status
-    </div> -->
-<!-- 
-    <div class="panel-body">
-      <h3>{{title}}</h3>
-    </div> -->
-
-    <router-outlet></router-outlet>
-    <!-- <app-login></app-login> -->
-    <!-- <app-nav></app-nav> -->
-    <!-- <app-chatpage></app-chatpage> -->
-    <!-- <app-cm-chatpage></app-cm-chatpage> -->
-  </div>
-<!-- </div> -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>   
+   <div onload="disconnect()">
+        <div>
+            <input type="text" id="from" placeholder="Choose a nickname"/>
+        </div>
+        <br />
+        <div>
+            <button id="connect" (click)="connect()">Connect</button>
+            <button id="disconnect" disabled="disabled" onclick="disconnect();">
+                Disconnect
+            </button>
+        </div>
+        <br />
+        <div id="conversationDiv">
+            <input type="text" id="text" placeholder="Write a message..."/>
+            <button id="sendMessage" (click)="sendMessage()">Send</button>
+            <p id="response"></p>
+        </div>
+    </div>

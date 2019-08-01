@@ -62,3 +62,4 @@ import 'zone.js/dist/zone';  // Included with Angular CLI.
  * APPLICATION IMPORTS
  */
 // impsort { LoginComponent } from './app/component/login/login.component';
+(window as any).global = window;
