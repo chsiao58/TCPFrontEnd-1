@@ -1,6 +1,18 @@
 import { Component } from '@angular/core';
 import * as SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
+import { HttpHeaders } from '@angular/common/http';
+
+const httpOptions = {
+  headers: new HttpHeaders(
+  {
+    'Access-Control-Allow-Origin' : '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+    'Content-Type': 'application/json'
+  }
+  )
+ };
 
 @Component({
   selector: 'app-root',
@@ -23,9 +35,10 @@ setConnected(connected) {
   }
 
 connect() {
-      let socket = new SockJS('http://localhost:8080/spring-mvc-java/chat');
+      let socket = new SockJS('http://localhost:8080/chat');
       this.stompClient = Stomp.over(socket);
-      this.stompClient.connect({}, function(frame) {
+      console.log(this.stompClient);
+      this.stompClient.connect(httpOptions, function(frame) {
           this.setConnected(true);
           console.log('Connected: ' + frame);
           this.stompClient.subscribe('/topic/messages', function(messageOutput) {
@@ -44,7 +57,7 @@ disconnect() {
 
 sendMessage() {
       let from = (document.getElementById('from') as HTMLInputElement).value;
-      let text = (document.getElementById('text')as HTMLInputElement).value;
+      let text = (document.getElementById('text') as HTMLInputElement).value;
       this.stompClient.send('/app/chat', {},
         JSON.stringify({from: from, text: text}));
   }
