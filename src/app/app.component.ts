@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import * as SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
 import { HttpHeaders } from '@angular/common/http';
@@ -19,7 +19,7 @@ const httpOptions = {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   private title = 'WebSockets chat';
   private stompClient = null;
 
@@ -27,7 +27,11 @@ export class AppComponent {
   constructor() {
   }
 
-setConnected(connected) {
+  ngOnInit() {
+    this.disconnect();
+  }
+
+setConnected(connected: boolean) {
       (document.getElementById('disconnect') as HTMLInputElement).disabled = !connected;
       document.getElementById('conversationDiv').style.visibility
         = connected ? 'visible' : 'hidden';
@@ -38,10 +42,12 @@ connect() {
       let socket = new SockJS('http://localhost:8080/chat');
       this.stompClient = Stomp.over(socket);
       console.log(this.stompClient);
-      this.stompClient.connect(httpOptions, function(frame) {
-          this.setConnected(true);
+      const that = this;
+
+      this.stompClient.connect({}, frame => {
+          that.setConnected(true);
           console.log('Connected: ' + frame);
-          this.stompClient.subscribe('/topic/messages', function(messageOutput) {
+          this.stompClient.subscribe('/topic/messages', messageOutput => {
               this.showMessageOutput(JSON.parse(messageOutput.body));
           });
       });
